@@ -1,6 +1,9 @@
 use serde::{Deserialize, Serialize};
 use serde::de::{Deserializer, Error};
 use serde::ser::{Serializer, SerializeTuple};
+
+use std::mem::{replace, zeroed};
+
 use super::error::ProtoError;
 use super::private_key::*;
 use super::key_type::{KeyType, KeyTypeEnum};
@@ -72,38 +75,38 @@ impl From<PrivateKey> for PublicKey {
 }
 
 impl From<RsaPrivateKey> for RsaPublicKey {
-    fn from(key: RsaPrivateKey) -> Self {
+    fn from(mut key: RsaPrivateKey) -> Self {
         Self {
-            e: key.e,
-            n: key.n
+            e: replace(&mut key.e, unsafe { zeroed() }),
+            n: replace(&mut key.n, unsafe { zeroed() })
         }
     }
 }
 
 impl From<DssPrivateKey> for DssPublicKey {
-    fn from(key: DssPrivateKey) -> Self {
+    fn from(mut key: DssPrivateKey) -> Self {
         Self {
-            p: key.p,
-            q: key.q,
-            g: key.g,
-            y: key.y
+            p: replace(&mut key.p, unsafe { zeroed() }),
+            q: replace(&mut key.q, unsafe { zeroed() }),
+            g: replace(&mut key.g, unsafe { zeroed() }),
+            y: replace(&mut key.y, unsafe { zeroed() })
         }
     }
 }
 
 impl From<EcDsaPrivateKey> for EcDsaPublicKey {
-    fn from(key: EcDsaPrivateKey) -> Self {
+    fn from(mut key: EcDsaPrivateKey) -> Self {
         Self {
-            identifier: key.identifier,
-            q: key.q
+            identifier: replace(&mut key.identifier, unsafe { zeroed() }),
+            q: replace(&mut key.q, unsafe { zeroed() })
         }
     }
 }
 
 impl From<Ed25519PrivateKey> for Ed25519PublicKey {
-    fn from(key: Ed25519PrivateKey) -> Self {
+    fn from(mut key: Ed25519PrivateKey) -> Self {
         Self {
-            enc_a: key.enc_a
+            enc_a: replace(&mut key.enc_a, unsafe { zeroed() })
         }
     }
 }
@@ -145,5 +148,3 @@ impl_key_type_enum_ser_de!(
     (PublicKey::EcDsa, EcDsaPublicKey),
     (PublicKey::Ed25519, Ed25519PublicKey)
 );
-
-

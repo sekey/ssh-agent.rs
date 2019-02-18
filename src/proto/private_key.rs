@@ -1,10 +1,24 @@
 use serde::{Deserialize, Serialize};
 use serde::de::{Deserializer, Error};
 use serde::ser::{Serializer, SerializeTuple};
+
+use std::mem::zeroed;
+use std::ptr::write_volatile;
+
 use super::error::ProtoError;
 use super::key_type::{KeyType, KeyTypeEnum};
 
 pub type MpInt = Vec<u8>;
+
+macro_rules! ClearOnDrop {
+    ($name:ident) => {
+        impl Drop for $name {
+            fn drop(&mut self) {
+                unsafe{ write_volatile(self, zeroed()) };
+            }
+        }
+    }
+}
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
 pub struct DssPrivateKey {
@@ -14,12 +28,14 @@ pub struct DssPrivateKey {
     pub y: MpInt,
     pub x: MpInt
 }
+ClearOnDrop!(DssPrivateKey);
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
 pub struct Ed25519PrivateKey {
     pub enc_a: Vec<u8>,
     pub k_enc_a: Vec<u8>
 }
+ClearOnDrop!(Ed25519PrivateKey);
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
 pub struct RsaPrivateKey {
@@ -30,6 +46,7 @@ pub struct RsaPrivateKey {
     pub p: MpInt,
     pub q: MpInt
 }
+ClearOnDrop!(RsaPrivateKey);
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
 pub struct EcDsaPrivateKey {
@@ -37,6 +54,7 @@ pub struct EcDsaPrivateKey {
     pub q: MpInt,
     pub d: MpInt
 }
+ClearOnDrop!(EcDsaPrivateKey);
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum PrivateKey {
