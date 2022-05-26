@@ -14,6 +14,7 @@ edition = "2018"
 [badges]
 travis-ci = { repository = "sekey/ssh-agent.rs" }
 codecov = { repository = "sekey/ssh-agent.rs" }
+maintenance = { status = "as-is" }
 
 [dependencies]
 byteorder = "1.2.7"
